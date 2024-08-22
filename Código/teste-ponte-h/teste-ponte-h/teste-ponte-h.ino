@@ -1,3 +1,4 @@
+//CODE BY TURMINHA DO DIDI😂🤣
 int pino1 = 2;
 int pino2 = 3;
 int pino3 = 4;
@@ -10,18 +11,13 @@ void setup () {
   pinMode (pino2, OUTPUT);
 }
 void loop (){
-  motor_left();
-  delay (2000);
-
-  motor_right();
+  andar_frente();
   delay (2000);
 }
 
-void motor_left(){
-  digitalWrite (pino1, HIGH);
-  digitalWrite (pino2, LOW);
+void andar_frente(){
+  digitalWrite (pino1, LOW);
+  digitalWrite (pino2, HIGH);
+  digitalWrite (pino3, LOW);
+  digitalWrite (pino4, HIGH);
 } 
-void motor_right (){
-  digitalWrite (pino3, HIGH);
-  digitalWrite (pino4, LOW);
-}
