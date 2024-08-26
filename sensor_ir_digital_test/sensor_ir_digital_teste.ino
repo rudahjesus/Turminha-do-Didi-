@@ -1,5 +1,5 @@
-const int irPins[4] = {8, 9, 10, 11};
-int irSensorAnalog[4] = {0,0,0,0};
+const int irPins[5] = {8, 9, 10, 11, 12};
+int irSensorAnalog[5] = {0,0,0,0,0};
 
 
 void setup () {
@@ -18,7 +18,7 @@ void loop (){
 
 void scanA(){
 
-  for ( int count = 0; count < 4;count++ ){
+  for ( int count = 0; count < 5;count++ ){
 
     irSensorAnalog[count] = digitalRead(irPins[count]);
 /*
@@ -39,6 +39,8 @@ void scanA(){
   Serial.print(irSensorAnalog[2]);
   Serial.print("|");
   Serial.print(irSensorAnalog[3]);
+  Serial.print("|");
+  Serial.print(irSensorAnalog[4]);
   Serial.print("|");
   Serial.println(".");
   delay (50); 
