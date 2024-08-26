@@ -1,5 +1,5 @@
 const int irPins[5] = {8, 9, 10, 11, 12};
-int irSensorAnalog[5] = {0,0,0,0,0};
+int irSensorDigital[5] = {0,0,0,0,0};
 
 
 void setup () {
@@ -20,27 +20,27 @@ void scanA(){
 
   for ( int count = 0; count < 5;count++ ){
 
-    irSensorAnalog[count] = digitalRead(irPins[count]);
+    irSensorDigital[count] = digitalRead(irPins[count]);
 /*
-  if(irSensorAnalog[count] > 800 && irSensorAnalog[count] < 1000){
+  if(irSensorDigital[count] > 800 && irSensorDigital[count] < 1000){
     Serial.print("Preto |");
 
   }
-  else if (irSensorAnalog[count] > 0 && irSensorAnalog[count] < 150){
+  else if (irSensorDigital[count] > 0 && irSensorDigital[count] < 150){
     Serial.print("Branco |");
   }
   else
   Serial.print("VerdeBrat |"); */
 
-  Serial.print(irSensorAnalog[0]);
+  Serial.print(irSensorDigital[0]);
   Serial.print("|");
-  Serial.print(irSensorAnalog[1]);
+  Serial.print(irSensorDigital[1]);
   Serial.print("|");
-  Serial.print(irSensorAnalog[2]);
+  Serial.print(irSensorDigital[2]);
   Serial.print("|");
-  Serial.print(irSensorAnalog[3]);
+  Serial.print(irSensorDigital[3]);
   Serial.print("|");
-  Serial.print(irSensorAnalog[4]);
+  Serial.print(irSensorDigital[4]);
   Serial.print("|");
   Serial.println(".");
   delay (50); 
