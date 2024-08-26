@@ -1,11 +1,11 @@
-const int irPins[4] = {A1, A2, A3, A4};
-int irSensorAnalog[4] = {0,0,0,0};
+const int irPins[5] = {A0, A1, A2, A3, A4};
+int irSensorAnalog[5] = {0,0,0,0,0};
 
 
 void setup () {
 
     /* Set-up IR sensor pins as input */
-  for (int i = 0; i <= 4; i++){
+  for (int i = 0; i <= 5; i++){
     pinMode(irPins[i], INPUT);
   }
 
@@ -18,7 +18,7 @@ void loop (){
 
 void scanA(){
 
-  for ( int count = 0; count < 4;count++ ){
+  for ( int count = 0; count < 5;count++ ){
 
     irSensorAnalog[count] = analogRead(irPins[count]);
 /*
@@ -39,6 +39,8 @@ void scanA(){
   Serial.print(irSensorAnalog[2]);
   Serial.print("|");
   Serial.print(irSensorAnalog[3]);
+  Serial.print("|");
+  Serial.print(irSensorAnalog[4]);
   Serial.print("|");
   Serial.println(".");
   delay (50); 
