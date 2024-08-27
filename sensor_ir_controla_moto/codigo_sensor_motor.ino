@@ -46,38 +46,56 @@ void loop() {
 
 
 void andar_frente() {
-  analogWrite (mDireita1, 125);
+  analogWrite (mDireita1, 130);
   analogWrite (mDireita2, 0);
   analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 125);
+  analogWrite (mEsquerda2, 130);
 }
 
 void andar_esquerda() {
-  analogWrite (mDireita1, 125);
+  analogWrite (mDireita1, 130);
   analogWrite (mDireita2, 0);
-  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda1, 125);
   analogWrite (mEsquerda2, 0);
 }
 
 void andar_direita() {
   analogWrite (mDireita1, 0);
-  analogWrite (mDireita2, 0);
+  analogWrite (mDireita2, 125);
   analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 125);
+  analogWrite (mEsquerda2, 130);
 }
 
 void andar_de_re() {
-  analogWrite (mDireita1, 125);
+  analogWrite (mDireita1, 130);
   analogWrite (mDireita2, 0);
   analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 125);
+  analogWrite (mEsquerda2, 130);
 }
 
+/*
+void andar_90_direita(){
+  analogWrite (mDireita1, 0);
+  analogWrite (mDireita2, 0);
+  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda2, 115);
+  delay(1000);
+}
+
+void andar_90_esquerda(){
+  analogWrite (mDireita1, 115);
+  analogWrite (mDireita2, 0);
+  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda2, 0);
+  delay(1000);
+}
+*/
 void start(){
 
   //11100
   if (irSensorDigital[0] == 1 && irSensorDigital[1] == 1 && irSensorDigital[2] == 1 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
     andar_esquerda();
+    
   }
 
   //11000
