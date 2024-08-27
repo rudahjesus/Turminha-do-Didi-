@@ -5,10 +5,10 @@ const int irPins[5] = {8, 9, 10, 11,12};
 int irSensorDigital[5] = {0,0,0,0,0};
 
 //VARIAVEIS DO MOTOR
-int md1 = 2;
-int md2 = 3;
-int me1 = 4;
-int me2 = 5;
+int mDireita1 = 2;
+int mDireita2 = 3;
+int mEsquerda1 = 4;
+int mEsquerda2 = 5;
 void setup() {
 
     // PINAGEM DO SENSOR IR COMO ENTRADA 
@@ -17,10 +17,10 @@ void setup() {
   }
 
   //PINAGEM DO MOTOR COMO SAÍDA
-  pinMode (md1, OUTPUT);
-  pinMode (md2, OUTPUT);
-  pinMode (me1, OUTPUT);
-  pinMode (md2, OUTPUT);
+  pinMode (mDireita1, OUTPUT);
+  pinMode (mDireita2, OUTPUT);
+  pinMode (mEsquerda1, OUTPUT);
+  pinMode (mDireita2, OUTPUT);
 
   delay(200);
   Serial.begin(9600);
@@ -46,31 +46,31 @@ void loop() {
 
 
 void andar_frente() {
-  digitalWrite (md1, LOW);
-  digitalWrite (md2, HIGH);
-  digitalWrite (me1, LOW);
-  digitalWrite (me2, HIGH);
+  analogWrite (mDireita1, 125);
+  analogWrite (mDireita2, 0);
+  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda2, 125);
 }
 
 void andar_esquerda() {
-  digitalWrite (md1, LOW);
-  digitalWrite (md2, LOW);
-  digitalWrite (me1, LOW);
-  digitalWrite (me2, HIGH);
+  analogWrite (mDireita1, 125);
+  analogWrite (mDireita2, 0);
+  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda2, 0);
 }
 
 void andar_direita() {
-  digitalWrite (md1, LOW);
-  digitalWrite (md2, HIGH);
-  digitalWrite (me1, LOW);
-  digitalWrite (me2, LOW);
+  analogWrite (mDireita1, 0);
+  analogWrite (mDireita2, 0);
+  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda2, 125);
 }
 
 void andar_de_re() {
-  digitalWrite (md1, HIGH);
-  digitalWrite (md2, LOW);
-  digitalWrite (me1, HIGH);
-  digitalWrite (me2, LOW);
+  analogWrite (mDireita1, 125);
+  analogWrite (mDireita2, 0);
+  analogWrite (mEsquerda1, 0);
+  analogWrite (mEsquerda2, 125);
 }
 
 void start(){
@@ -78,7 +78,6 @@ void start(){
   //11100
   if (irSensorDigital[0] == 1 && irSensorDigital[1] == 1 && irSensorDigital[2] == 1 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
     andar_esquerda();
-
   }
 
   //11000
@@ -87,6 +86,10 @@ void start(){
   }
   //10000
   else if(irSensorDigital[0] == 1 && irSensorDigital[1] == 0 && irSensorDigital[2] == 0 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
+    andar_esquerda();
+  }
+  //01100
+  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 1 && irSensorDigital[2] == 1 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
     andar_esquerda();
   }
   //01000
