@@ -46,8 +46,8 @@ void loop() {
 
 
 void andar_frente() {
-  digitalWrite (md1, HIGH);
-  digitalWrite (md2, LOW);
+  digitalWrite (md1, LOW);
+  digitalWrite (md2, HIGH);
   digitalWrite (me1, LOW);
   digitalWrite (me2, HIGH);
 }
@@ -60,15 +60,15 @@ void andar_esquerda() {
 }
 
 void andar_direita() {
-  digitalWrite (md1, HIGH);
-  digitalWrite (md2, LOW);
+  digitalWrite (md1, LOW);
+  digitalWrite (md2, HIGH);
   digitalWrite (me1, LOW);
   digitalWrite (me2, LOW);
 }
 
 void andar_de_re() {
-  digitalWrite (md1, LOW);
-  digitalWrite (md2, HIGH);
+  digitalWrite (md1, HIGH);
+  digitalWrite (md2, LOW);
   digitalWrite (me1, HIGH);
   digitalWrite (me2, LOW);
 }
