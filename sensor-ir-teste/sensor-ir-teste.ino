@@ -1,48 +1,36 @@
-const int irPins[4] = {A1, A2, A3, A4};
-int irSensorAnalog[4] = {0,0,0,0};
+int PinsIr[5]={A0, A1, A2, A3, A4};
+int SAnalog[5]={0,0,0,0,0};
+//int Motor[4]{2, 3, 4, 5};
 
+void setup() {
+ 
+ 
 
-void setup () {
-
-    /* Set-up IR sensor pins as input */
-  for (int i = 0; i <= 4; i++){
-    pinMode(irPins[i], INPUT);
+  for (int i=0; i<5; i++){ 
+    pinMode(PinsIr[i], INPUT);
   }
-
-  Serial.begin(9600);
-
+Serial.begin(9600);
+  // for (int i=0; i<4; i++){
+  //   pinMode(Motor[i], OUTPUT);
+  // }
 }
-void loop (){
-    scanA();
+void loop() {
+
+  scanA();
+
+  
+
 }
 
 void scanA(){
 
-  for ( int count = 0; count < 4;count++ ){
-
-    irSensorAnalog[count] = analogRead(irPins[count]);
-/*
-  if(irSensorAnalog[count] > 800 && irSensorAnalog[count] < 1000){
-    Serial.print("Preto |");
-
+  for ( int valorsensor = 0; valorsensor < 5;valorsensor++ ){
+    SAnalog[valorsensor] = analogRead(PinsIr[valorsensor]);
+    Serial.print(SAnalog[valorsensor]);
+    Serial.print("|");
   }
-  else if (irSensorAnalog[count] > 0 && irSensorAnalog[count] < 150){
-    Serial.print("Branco |");
-  }
-  else
-  Serial.print("VerdeBrat |"); */
-
-  Serial.print(irSensorAnalog[0]);
-  Serial.print("|");
-  Serial.print(irSensorAnalog[1]);
-  Serial.print("|");
-  Serial.print(irSensorAnalog[2]);
-  Serial.print("|");
-  Serial.print(irSensorAnalog[3]);
-  Serial.print("|");
   Serial.println(".");
   delay (50); 
-  
 }
- 
-} 
+
+  
