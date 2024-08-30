@@ -23,7 +23,7 @@ const int echoPin = 7;
 float duration, distance;
 
 // Distância mínima para desviar de obstáculos (em centímetros)
-const float safeDistance = 20.0; 
+const float safeDistance = 7.0; 
 
 //**************************************************************************************************************************
 //SETUP
@@ -106,21 +106,23 @@ void frente(int posa, int posb) {
   analogWrite(motorB2, posb);   // Controla a direção e a velocidade dos motores A e B
 }
 
+//******************************************************************************************
+//CONTROLE ESTÁTICO
 // Função para girar à direita
 void girarDireita() {
   analogWrite(motorA1, LOW);
   analogWrite(motorA2, baseSpeed);
   analogWrite(motorB1, baseSpeed);
   analogWrite(motorB2, LOW);
-  delay(500); // Gira por meio segundo (ajuste esse valor conforme necessário)
+  delay(1000); // Gira por 1 segundo (ajuste esse valor conforme necessário)
 }
 
-// Função para desviar de obstáculos
-void desviarObstaculo() {
-  parar();          // Para o robô
-  delay(500);       // Espera meio segundo
-  girarDireita();   // Gira à direita
-  delay(500);       // Espera mais meio segundo para estabilizar
+void girarEsquerda() {
+  analogWrite(motorA1, baseSpeed);
+  analogWrite(motorA2, LOW);
+  analogWrite(motorB1, LOW);
+  analogWrite(motorB2, baseSpeed);
+  delay(1000); // Gira por 1 segundo (ajuste esse valor conforme necessário)
 }
 
 // Função para parar o robô
@@ -131,6 +133,8 @@ void parar() {
   analogWrite(motorB2, LOW);
 }
 
+//******************************************************************************************
+// LÓGICA PRA DESVIAR DE OBSTÁCULO
 // Ultrassônico faz varredura
 void varredura(){
   digitalWrite(trigPin, LOW);
@@ -138,10 +142,26 @@ void varredura(){
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin,LOW);
-
   duration = pulseIn(echoPin, HIGH);
   distance = (duration * .0343) / 2;
   Serial.print("Distância: ");
   Serial.println(distance);
   delay(100);
+}
+
+// Função para desviar de obstáculos
+void desviarObstaculo() {
+  parar();          // Para o robô
+  delay(500);       // Espera meio segundo
+  girarDireita();   // Gira pra direita
+  delay(1000);       
+  frente(200, 200); 
+  delay(1000);      // anda pra frente por 1 segundo
+  girarEsquerda(); // gira pra esquerda
+  delay(1000);     
+  frente(200, 200); // anda pra frente por 1 segundo
+  delay(1000);
+  girarEsqueda(); // gira pra esquerda
+  delay(1000);
+  seguirLinha(); // volta a rotina normal
 }
