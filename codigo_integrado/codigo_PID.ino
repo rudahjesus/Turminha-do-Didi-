@@ -1,3 +1,5 @@
+//CODE BY TURMINHA DO DIDI 😂🤣
+
 #include <QTRSensors.h> 
 
 // MOTORES
