@@ -3,7 +3,7 @@
 #include <QTRSensors.h> 
 
 // MOTORES
-const int motorA1 = 2, motorA2 = 3, motorB1 = 5, motorB2 = 4; // Define os pinos de controle dos motores A e B
+const int motorA1 = 3, motorA2 = 2, motorB1 = 4, motorB2 = 5; // Define os pinos de controle dos motores A e B
 const int speedMax = 200; // Define a velocidade máxima permitida para ambos os motores (0 a 255)
 const int baseSpeed = 160; // Define a velocidade base dos motores, que será ajustada pelo controle PID
 
