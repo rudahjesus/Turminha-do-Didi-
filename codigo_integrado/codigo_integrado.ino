@@ -1,155 +1,96 @@
-//CODE BY TURMINHA DO DIDI 😂🤣 MORCEGOPOCILGA
+//PROGRAM BY TURMINHA DO DIDI😂🤣
+#include <QTRSensors.h> 
 
-//VARIAVEIS DO IR
-const int irPins[5] = {8, 9, 10, 11,12};
-int irSensorDigital[5] = {0,0,0,0,0};
+//DECLARAÇÃO DE VARIÁVEL
+// MOTORES
+const int motorA1 = 2, motorA2 = 3, motorB1 = 5, motorB2 = 4; // Define os pinos de controle dos motores A e B
+const int speedMax = 200; // Define a velocidade máxima permitida para ambos os motores (0 a 255)
+const int baseSpeed = 160; // Define a velocidade base dos motores, que será ajustada pelo controle PID
 
-//VARIAVEIS DO MOTOR
-int mDireita1 = 2;
-int mDireita2 = 3;
-int mEsquerda1 = 4;
-int mEsquerda2 = 5;
+// PID
+int lastError = 0; // Armazena o último erro calculado, usado para o termo derivativo do PID
+float Kp = 55, Kd = 30, Ki = 0.00; // Constantes de ajuste do PID (Proporcional, Derivativo, Integral)
+int proportional, integral, derivative; // Variáveis PID
 
-//VARIAVEIS DO SENSOR ULTRASSONICO
+//SENSORES IR
+QTRSensors qtr; // Cria um objeto da classe QTRSensors para gerenciar os sensores de refletância
+const uint8_t SensorCount = 5; // Define o número de sensores de refletância usados
+uint16_t sensorValues[SensorCount]; // Array para armazenar os valores lidos pelos sensores
+
+//ULTRASSONICO
 const int trigPin = 6;
 const int echoPin = 7;
 float duration, distance;
 
+//**************************************************************************************************************************
+//SETUP
 void setup() {
+  qtr.setTypeRC();  // Configura os sensores como tipo RC (resistor-capacitor)
+  qtr.setSensorPins((const uint8_t[]){12,11,10,9,8}, SensorCount); // Define os pinos dos sensores de refletância
 
-    // PINAGEM DO SENSOR IR COMO ENTRADA 
-  for (int i = 0; i <= 5; i++){
-    pinMode(irPins[i], INPUT);
-  }
+  // Configura os pinos dos motores como saída
+  pinMode(motorA1, OUTPUT); 
+  pinMode(motorA2, OUTPUT);
+  pinMode(motorB1, OUTPUT); 
+  pinMode(motorB2, OUTPUT);
 
-  //PINAGEM DO MOTOR COMO SAÍDA
-  pinMode (mDireita1, OUTPUT);
-  pinMode (mDireita2, OUTPUT);
-  pinMode (mEsquerda1, OUTPUT);
-  pinMode (mDireita2, OUTPUT);
-  
+  // Configura pinos do Ultrassonico
   pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
-
-  delay(200);
-  Serial.begin(9600);
+  
+  
+  calibrateSensors(); // Realiza a calibração dos sensores de refletância
+  delay(5000); // Pausa por 5 segundos para dar tempo de ajuste/calibração 
 }
 
+//**************************************************************************************************************************
+//CALIBRAGEM
+void calibrateSensors() {
+  digitalWrite(LED_BUILTIN, HIGH);   // Acende o LED embutido para indicar o início da calibração
+  for (uint16_t i = 0; i < 50; i++) qtr.calibrate(); // Realiza a calibração dos sensores (captura valores máximos e mínimos)
+  digitalWrite(LED_BUILTIN, LOW); // Apaga o LED embutido após a calibração
+}
+
+//****************************************************************************************************************************
+//LOOP
 void loop() {
+  int error = 2000 - qtr.readLineBlack(sensorValues); // Calcula o erro, que é a diferença entre a posição desejada (2000) e a posição lida pelos sensores
+  proportional = error; // O termo Proporcional é simplesmente o erro atual (erro * t)
+  integral += error; // O termo Integral acumula o erro ao longo do tempo (Ki∫e dt)
+  derivative = error - lastError; // O termo Derivativo é a diferença entre o erro atual e o erro anterior (Kd(Δe/Δt) ou de/dt)
+  lastError = error; // Atualiza o último erro para o próximo cálculo do Derivativo
+  
+  // S = ∑((Kp(et) + Ki∫e dt + Kd(de/dt))
+  int PIDValue = (Kp * proportional) + (Ki * integral) + (Kd * derivative); // Calcula o valor de correção da velocidade usando o PID
+  bool noventa_graus = (sensorValues[0] < 100 || sensorValues[4] < 100); // 90 graus
 
-  for ( int count = 0; count < 5;count++ ){
-
-    irSensorDigital[count] = digitalRead(irPins[count]);
+  //Limita velocidade com base na posição
+  int speedA, speedB;
+    if (noventa_graus) {
+      // Ajusta as velocidades para uma curva
+      speedA = constrain(baseSpeed - PIDValue, 0, speedMax); // Motor interno da curva mais lento
+      speedB = constrain(baseSpeed + PIDValue, 0, speedMax); // Motor externo da curva mais rápido
+    } else {
+      // Controle normal de linha reta
+      speedA = constrain(baseSpeed + PIDValue, 0, speedMax);
+      speedB = constrain(baseSpeed - PIDValue, 0, speedMax);
     }
-    
-  start();
-  varredura();
+
+  frente(speedA, speedB); // Envia as velocidades ajustadas para os motores para que o robô siga a linha
+  varredura(); // Chama o Ultrassônico
+}
+//****************************************************************************************************************************
+
+//Andar pra frente
+void frente(int posa, int posb) {
+  analogWrite(motorA1, LOW); 
+  analogWrite(motorA2, posa);
+  analogWrite(motorB1, LOW); 
+  analogWrite(motorB2, posb);   // Controla a direção e a velocidade dos motores A e B
 }
 
-
-
-
-void andar_frente() {
-  analogWrite (mDireita1, 130);
-  analogWrite (mDireita2, 0);
-  analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 130);
-}
-
-void andar_esquerda() {
-  analogWrite (mDireita1, 130);
-  analogWrite (mDireita2, 0);
-  analogWrite (mEsquerda1, 125);
-  analogWrite (mEsquerda2, 0);
-}
-
-void andar_direita() {
-  analogWrite (mDireita1, 0);
-  analogWrite (mDireita2, 125);
-  analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 130);
-}
-
-void andar_de_re() {
-  analogWrite (mDireita1, 130);
-  analogWrite (mDireita2, 0);
-  analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 130);
-}
-
-void andar_90_direita(){
-  analogWrite (mDireita1, 0);
-  analogWrite (mDireita2, 0);
-  analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 115);
-  delay(1000);
-}
-
-void andar_90_esquerda(){
-  analogWrite (mDireita1, 115);
-  analogWrite (mDireita2, 0);
-  analogWrite (mEsquerda1, 0);
-  analogWrite (mEsquerda2, 0);
-  delay(1000);
-}
-
-void start(){
-
-  //11100
-  if (irSensorDigital[0] == 1 && irSensorDigital[1] == 1 && irSensorDigital[2] == 1 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
-    andar_esquerda();
-    
-  }
-
-  //11000
-  else if(irSensorDigital[0] == 1 && irSensorDigital[1] == 1 && irSensorDigital[2] == 0 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
-    andar_esquerda();
-  }
-  //10000
-  else if(irSensorDigital[0] == 1 && irSensorDigital[1] == 0 && irSensorDigital[2] == 0 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
-    andar_esquerda();
-  }
-  //01100
-  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 1 && irSensorDigital[2] == 1 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
-    andar_esquerda();
-  }
-  //01000
-  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 1 && irSensorDigital[2] == 0 && irSensorDigital[3] == 0 && irSensorDigital[4] == 0){
-    andar_esquerda();
-  }
-  
-    //CASOS PARA ANDAR PARA A DIREITA
-
-  //00111
-  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 0 && irSensorDigital[2] == 1 && irSensorDigital[3] == 1 && irSensorDigital[4] == 1){ 
-    andar_direita(); 
-
-  }
-
-  //00011
-  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 0 && irSensorDigital[2] == 0 && irSensorDigital[3] == 1 && irSensorDigital[4] == 1){
-    andar_direita();
-  }
-
-  //00001
-  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 0 && irSensorDigital[2] == 0 && irSensorDigital[3] == 0 && irSensorDigital[4] == 1){
-    andar_direita();
-  }
-  
-  //00010
-  else if(irSensorDigital[0] == 0 && irSensorDigital[1] == 0 && irSensorDigital[2] == 0 && irSensorDigital[3] == 1 && irSensorDigital[4] == 0){
-    andar_direita();
-  }
-
-    //CASOS PARA ANDAR PARA A FRENTE
-
-  else{
-    andar_frente();
-  }
-}
-
+// Ultrassônico faz varredura
 void varredura(){
-
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -161,19 +102,4 @@ void varredura(){
   Serial.print("Distância: ");
   Serial.println(distance);
   delay(100);
-
-  if(distance <= 10){
-    andar_90_direita();
-    andar_frente();
-    delay(2000);
-    andar_90_esquerda();
-    andar_frente();
-    delay(2000);
-    andar_90_esquerda();
-    andar_frente();
-    delay(2000);
-    andar_90_direita();
-    start();
-  }
-
 }
