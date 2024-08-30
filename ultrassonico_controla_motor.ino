@@ -10,7 +10,7 @@ int mDireita2 = 3;
 int mEsquerda1 = 4;
 int mEsquerda2 = 5;
 
-float duration, xdistance;
+float duration, distance;
 
 
 void setup() {
@@ -61,4 +61,19 @@ void andar_de_re() {
 
 void ultrassonico() {
   //CASO DETECTA OBJETO A UMA DISTANCIA ENTRE 2cm E 5cm
-  if (distance = );
+/*  
+  if (distance => 2 && distance =< 5){
+    andar_de_re();
+    delay(2000);
+    andar_direita();
+    delay(2000);
+    andar_esquerda();
+    delay(200);
+    andar_frente();
+    delay(2000);
+    andar_esquerda();
+    delay(2000);
+    andar_direita();
+    delay(2000);    
+  }
+*/

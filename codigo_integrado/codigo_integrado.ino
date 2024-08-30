@@ -22,6 +22,9 @@ const int trigPin = 6;
 const int echoPin = 7;
 float duration, distance;
 
+// Distância mínima para desviar de obstáculos (em centímetros)
+const float safeDistance = 20.0; 
+
 //**************************************************************************************************************************
 //SETUP
 void setup() {
@@ -37,7 +40,8 @@ void setup() {
   // Configura pinos do Ultrassonico
   pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
-  
+
+  Serial.begin(9600); // Inicializa a comunicação serial para depuração
   
   calibrateSensors(); // Realiza a calibração dos sensores de refletância
   delay(5000); // Pausa por 5 segundos para dar tempo de ajuste/calibração 
@@ -54,6 +58,20 @@ void calibrateSensors() {
 //****************************************************************************************************************************
 //LOOP
 void loop() {
+  varredura(); // Chama o Ultrassônico para medir a distância
+  
+  if (distance < safeDistance) {
+    // Se um obstáculo estiver próximo, desvia
+    desviarObstaculo();
+  } else {
+    // Caso contrário, segue a linha normalmente
+    seguirLinha();
+  }
+}
+
+//****************************************************************************************************************************
+// Função para seguir a linha
+void seguirLinha() {
   int error = 2000 - qtr.readLineBlack(sensorValues); // Calcula o erro, que é a diferença entre a posição desejada (2000) e a posição lida pelos sensores
   proportional = error; // O termo Proporcional é simplesmente o erro atual (erro * t)
   integral += error; // O termo Integral acumula o erro ao longo do tempo (Ki∫e dt)
@@ -66,27 +84,51 @@ void loop() {
 
   //Limita velocidade com base na posição
   int speedA, speedB;
-    if (noventa_graus) {
-      // Ajusta as velocidades para uma curva
-      speedA = constrain(baseSpeed - PIDValue, 0, speedMax); // Motor interno da curva mais lento
-      speedB = constrain(baseSpeed + PIDValue, 0, speedMax); // Motor externo da curva mais rápido
-    } else {
-      // Controle normal de linha reta
-      speedA = constrain(baseSpeed + PIDValue, 0, speedMax);
-      speedB = constrain(baseSpeed - PIDValue, 0, speedMax);
-    }
+  if (noventa_graus) {
+    // Ajusta as velocidades para uma curva
+    speedA = constrain(baseSpeed - PIDValue, 0, speedMax); // Motor interno da curva mais lento
+    speedB = constrain(baseSpeed + PIDValue, 0, speedMax); // Motor externo da curva mais rápido
+  } else {
+    // Controle normal de linha reta
+    speedA = constrain(baseSpeed + PIDValue, 0, speedMax);
+    speedB = constrain(baseSpeed - PIDValue, 0, speedMax);
+  }
 
   frente(speedA, speedB); // Envia as velocidades ajustadas para os motores para que o robô siga a linha
-  varredura(); // Chama o Ultrassônico
 }
-//****************************************************************************************************************************
 
-//Andar pra frente
+//****************************************************************************************************************************
+// Função para andar pra frente
 void frente(int posa, int posb) {
   analogWrite(motorA1, LOW); 
   analogWrite(motorA2, posa);
   analogWrite(motorB1, LOW); 
   analogWrite(motorB2, posb);   // Controla a direção e a velocidade dos motores A e B
+}
+
+// Função para girar à direita
+void girarDireita() {
+  analogWrite(motorA1, LOW);
+  analogWrite(motorA2, baseSpeed);
+  analogWrite(motorB1, baseSpeed);
+  analogWrite(motorB2, LOW);
+  delay(500); // Gira por meio segundo (ajuste esse valor conforme necessário)
+}
+
+// Função para desviar de obstáculos
+void desviarObstaculo() {
+  parar();          // Para o robô
+  delay(500);       // Espera meio segundo
+  girarDireita();   // Gira à direita
+  delay(500);       // Espera mais meio segundo para estabilizar
+}
+
+// Função para parar o robô
+void parar() {
+  analogWrite(motorA1, LOW);
+  analogWrite(motorA2, LOW);
+  analogWrite(motorB1, LOW);
+  analogWrite(motorB2, LOW);
 }
 
 // Ultrassônico faz varredura
@@ -98,7 +140,7 @@ void varredura(){
   digitalWrite(trigPin,LOW);
 
   duration = pulseIn(echoPin, HIGH);
-  distance = (duration*.0343)/2;
+  distance = (duration * .0343) / 2;
   Serial.print("Distância: ");
   Serial.println(distance);
   delay(100);
