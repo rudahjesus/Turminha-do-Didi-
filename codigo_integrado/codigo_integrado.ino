@@ -1,9 +1,9 @@
-//PROGRAM BY TURMINHA DO DIDI😂🤣
+//CODE BY TURMINHA DO DIDI 😂🤣
+
 #include <QTRSensors.h> 
 
-//DECLARAÇÃO DE VARIÁVEL
 // MOTORES
-const int motorA1 = 2, motorA2 = 3, motorB1 = 5, motorB2 = 4; // Define os pinos de controle dos motores A e B
+const int motorA1 = 3, motorA2 = 2, motorB1 = 4, motorB2 = 5; // Define os pinos de controle dos motores A e B
 const int speedMax = 200; // Define a velocidade máxima permitida para ambos os motores (0 a 255)
 const int baseSpeed = 160; // Define a velocidade base dos motores, que será ajustada pelo controle PID
 
@@ -18,14 +18,9 @@ const uint8_t SensorCount = 5; // Define o número de sensores de refletância u
 uint16_t sensorValues[SensorCount]; // Array para armazenar os valores lidos pelos sensores
 
 //ULTRASSONICO
-const int trigPin = 6;
-const int echoPin = 7;
+const int trigPin = 6, echoPin = 7;
 float duration, distance;
 
-// Distância mínima para desviar de obstáculos (em centímetros)
-const float safeDistance = 7.0; 
-
-//**************************************************************************************************************************
 //SETUP
 void setup() {
   qtr.setTypeRC();  // Configura os sensores como tipo RC (resistor-capacitor)
@@ -37,17 +32,13 @@ void setup() {
   pinMode(motorB1, OUTPUT); 
   pinMode(motorB2, OUTPUT);
 
-  // Configura pinos do Ultrassonico
-  pinMode(echoPin, INPUT);
   pinMode(trigPin, OUTPUT);
-
-  Serial.begin(9600); // Inicializa a comunicação serial para depuração
+  pinMode(echoPin, INPUT);
   
   calibrateSensors(); // Realiza a calibração dos sensores de refletância
   delay(5000); // Pausa por 5 segundos para dar tempo de ajuste/calibração 
 }
 
-//**************************************************************************************************************************
 //CALIBRAGEM
 void calibrateSensors() {
   digitalWrite(LED_BUILTIN, HIGH);   // Acende o LED embutido para indicar o início da calibração
@@ -55,23 +46,8 @@ void calibrateSensors() {
   digitalWrite(LED_BUILTIN, LOW); // Apaga o LED embutido após a calibração
 }
 
-//****************************************************************************************************************************
-//LOOP
 void loop() {
-  varredura(); // Chama o Ultrassônico para medir a distância
-  
-  if (distance < safeDistance) {
-    // Se um obstáculo estiver próximo, desvia
-    desviarObstaculo();
-  } else {
-    // Caso contrário, segue a linha normalmente
-    seguirLinha();
-  }
-}
-
-//****************************************************************************************************************************
-// Função para seguir a linha
-void seguirLinha() {
+  varredura();
   int error = 2000 - qtr.readLineBlack(sensorValues); // Calcula o erro, que é a diferença entre a posição desejada (2000) e a posição lida pelos sensores
   proportional = error; // O termo Proporcional é simplesmente o erro atual (erro * t)
   integral += error; // O termo Integral acumula o erro ao longo do tempo (Ki∫e dt)
@@ -84,84 +60,76 @@ void seguirLinha() {
 
   //Limita velocidade com base na posição
   int speedA, speedB;
+
   if (noventa_graus) {
-    // Ajusta as velocidades para uma curva
-    speedA = constrain(baseSpeed - PIDValue, 0, speedMax); // Motor interno da curva mais lento
-    speedB = constrain(baseSpeed + PIDValue, 0, speedMax); // Motor externo da curva mais rápido
+      // Ajusta as velocidades para uma curva
+      speedA = constrain(baseSpeed - PIDValue, 0, speedMax); // Motor interno da curva mais lento
+      speedB = constrain(baseSpeed + PIDValue, 0, speedMax); // Motor externo da curva mais rápido
   } else {
-    // Controle normal de linha reta
-    speedA = constrain(baseSpeed + PIDValue, 0, speedMax);
-    speedB = constrain(baseSpeed - PIDValue, 0, speedMax);
+      // Controle normal de linha reta
+      speedA = constrain(baseSpeed + PIDValue, 0, speedMax);
+      speedB = constrain(baseSpeed - PIDValue, 0, speedMax);
+  }
+  if (distance > 0 && distance < 15) { // Se houver um obstáculo a menos de 20 cm
+    desviar();
+  } else {
+    driveMotors(speedA, speedB);
   }
 
-  frente(speedA, speedB); // Envia as velocidades ajustadas para os motores para que o robô siga a linha
 }
 
-//****************************************************************************************************************************
-// Função para andar pra frente
-void frente(int posa, int posb) {
+void driveMotors(int posa, int posb) {
   analogWrite(motorA1, LOW); 
   analogWrite(motorA2, posa);
   analogWrite(motorB1, LOW); 
   analogWrite(motorB2, posb);   // Controla a direção e a velocidade dos motores A e B
 }
 
-//******************************************************************************************
-//CONTROLE ESTÁTICO
-// Função para girar à direita
-void girarDireita() {
-  analogWrite(motorA1, LOW);
-  analogWrite(motorA2, baseSpeed);
-  analogWrite(motorB1, baseSpeed);
-  analogWrite(motorB2, LOW);
-  delay(1000); // Gira por 1 segundo (ajuste esse valor conforme necessário)
-}
+void viradaEstatica(int posa1, int posa2, int posb1, int posb2){
+  analogWrite (motorA1, posa1);
+  analogWrite (motorA2, posa2);
+  analogWrite (motorB1, posb1);
+  analogWrite (motorB2, posb2);
+} 
 
-void girarEsquerda() {
-  analogWrite(motorA1, baseSpeed);
-  analogWrite(motorA2, LOW);
-  analogWrite(motorB1, LOW);
-  analogWrite(motorB2, baseSpeed);
-  delay(1000); // Gira por 1 segundo (ajuste esse valor conforme necessário)
-}
 
-// Função para parar o robô
-void parar() {
-  analogWrite(motorA1, LOW);
-  analogWrite(motorA2, LOW);
-  analogWrite(motorB1, LOW);
-  analogWrite(motorB2, LOW);
-}
-
-//******************************************************************************************
-// LÓGICA PRA DESVIAR DE OBSTÁCULO
-// Ultrassônico faz varredura
 void varredura(){
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin,LOW);
+
   duration = pulseIn(echoPin, HIGH);
-  distance = (duration * .0343) / 2;
+  distance = (duration*.0343)/2;
   Serial.print("Distância: ");
   Serial.println(distance);
   delay(100);
 }
 
-// Função para desviar de obstáculos
-void desviarObstaculo() {
-  parar();          // Para o robô
-  delay(500);       // Espera meio segundo
-  girarDireita();   // Gira pra direita
-  delay(1000);       
-  frente(200, 200); 
-  delay(1000);      // anda pra frente por 1 segundo
-  girarEsquerda(); // gira pra esquerda
-  delay(1000);     
-  frente(200, 200); // anda pra frente por 1 segundo
+void desviar(){
+  viradaEstatica(0, 0, 0, 0); //parar
+  delay(100);
+  viradaEstatica(170, 0, 170, 0); // direita
   delay(1000);
-  girarEsqueda(); // gira pra esquerda
+  viradaEstatica(170, 0, 0, 170); //frente
+  delay(800);
+  viradaEstatica(0, 0, 0, 0); //parar
+  delay(100);
+  viradaEstatica(0, 170, 0, 170); //esquerda 
+  delay(900);
+  viradaEstatica(170, 0, 0, 170); // frente
+  delay(1800);
+  viradaEstatica(0, 0, 0, 0); //parar
+  delay(100);
+  viradaEstatica(0, 170, 0, 170); //esquerda 
   delay(1000);
-  seguirLinha(); // volta a rotina normal
+  viradaEstatica(170, 0, 0, 170); //frente
+  delay(700);
+  viradaEstatica(0, 0, 0, 0); //parar
+  delay(100);
+  viradaEstatica(170, 0, 170, 0); // direita
+  delay(800);
+  viradaEstatica(170, 0, 0, 170); //seguir linha
+
 }
